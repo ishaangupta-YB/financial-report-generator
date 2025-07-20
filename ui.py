@@ -317,8 +317,9 @@ def create_sidebar():
         else:
             new_project_name = st.text_input(
                 "New Project Name",
-                value="my_financial_project",
-                help="Name for your new project (no spaces or special characters)"
+                value="Default",
+                help="Project name (using Default for LlamaCloud)",
+                disabled=True
             )
             
             new_index_name = st.text_input(
