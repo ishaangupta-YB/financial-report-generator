@@ -1,402 +1,680 @@
 import streamlit as st
+import pandas as pd
 import plotly.express as px
 import time
 
 
 def apply_custom_css():
-    """Apply custom CSS for beautiful styling."""
+    """Apply simple, minimal CSS styling with good contrast."""
     st.markdown("""
     <style>
-    .main {
-        padding-top: 2rem;
-    }
-
+    /* Clean, minimal design with good contrast */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-color: #ffffff;
+        color: #1a1a1a;
     }
-
-    .main-header {
-        background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+    
+    /* Main content styling */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1000px;
+    }
+    
+    /* Header styling */
+    .app-header {
+        background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+        color: white;
         padding: 2rem;
-        border-radius: 15px;
+        border-radius: 8px;
+        text-align: center;
         margin-bottom: 2rem;
-        text-align: center;
-        color: white;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
-
-    .feature-card {
-        background: rgba(255, 255, 255, 0.95);
+    
+    .app-title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .app-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-top: 0.5rem;
+    }
+    
+    /* Status cards */
+    .status-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    
+    .status-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
         padding: 1.5rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .report-section {
-        background: rgba(255, 255, 255, 0.98);
-        padding: 2rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border-left: 5px solid #667eea;
-    }
-
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 10px;
         text-align: center;
-        margin: 0.5rem;
     }
-
-    .success-banner {
-        background: linear-gradient(90deg, #56ab2f 0%, #a8e6cf 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 10px;
-        text-align: center;
+    
+    .status-card.connected {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+        color: #166534;
+    }
+    
+    .status-card.disconnected {
+        background: #fef2f2;
+        border-color: #fecaca;
+        color: #dc2626;
+    }
+    
+    .status-number {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .status-label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+    }
+    
+    /* Card styling */
+    .card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.5rem;
         margin: 1rem 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
-
-    .error-banner {
-        background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
-        color: white;
-        padding: 1rem;
-        border-radius: 10px;
-        text-align: center;
-        margin: 1rem 0;
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 0.5rem;
     }
-
+    
+    /* Button styling */
     .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #2563eb;
         color: white;
         border: none;
-        border-radius: 25px;
-        padding: 0.75rem 2rem;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
     }
-
+    
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        background: #1d4ed8;
     }
-
-    .sidebar .stSelectbox > div > div {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+    
+    .stButton > button:disabled {
+        background: #9ca3af;
+        color: #ffffff;
     }
-
-    h1, h2, h3 {
-        color: #2c3e50;
+    
+    /* Form styling */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stSelectbox > div > div > select {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        background: #ffffff;
     }
-
-    .report-text {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #34495e;
-        text-align: justify;
+    
+    .stTextInput > div > div > input:focus,
+    .stTextArea > div > div > textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
     }
-
-    .table-container {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: #f8fafc;
+    }
+    
+    /* Loading spinner */
+    .loading-container {
+        text-align: center;
+        padding: 2rem;
+        background: #f8fafc;
+        border-radius: 8px;
         margin: 1rem 0;
+    }
+    
+    .loading-text {
+        color: #6b7280;
+        margin-top: 1rem;
+    }
+    
+    /* Alert messages */
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin: 1rem 0;
+    }
+    
+    .alert-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+    
+    .alert-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+    }
+    
+    .alert-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+    }
+    
+    /* Report styling */
+    .report-section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .report-text {
+        line-height: 1.6;
+        color: #374151;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div > div {
+        background: #2563eb;
+    }
+    
+    /* Remove default Streamlit styling */
+    .stDeployButton {
+        visibility: hidden;
+    }
+    
+    header[data-testid="stHeader"] {
+        height: 0;
+    }
+    
+    .stMainBlockContainer {
+        padding-top: 1rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
 
 def create_header():
-    """Create the main application header."""
+    """Create simple header."""
     st.markdown("""
-    <div class="main-header">
-        <h1>🏦 Financial Report Generator</h1>
-        <p style="font-size: 1.2rem; margin-bottom: 0;">
-            AI-Powered Financial Analysis & Report Generation
-        </p>
+    <div class="app-header">
+        <h1 class="app-title">Financial Report Generator</h1>
+        <p class="app-subtitle">AI-powered financial analysis and reporting</p>
     </div>
     """, unsafe_allow_html=True)
 
 
 def create_sidebar():
-    """Create the sidebar with configuration options."""
+    """Create sidebar with user inputs."""
     with st.sidebar:
-        st.markdown("### 🛠️ Configuration")
-
+        st.markdown("### Settings")
+        
+        # Check if we have API keys from environment
+        try:
+            from backend import ProjectManager
+            pm = ProjectManager()
+            has_openai, has_llama = pm.get_api_keys_status()
+        except Exception as e:
+            st.error(f"Error loading backend: {str(e)}")
+            has_openai, has_llama = False, False
+        
         # API Keys section
         st.markdown("#### API Keys")
-        openai_key = st.text_input(
-            "OpenAI API Key",
-            type="password",
-            placeholder="sk-...",
-            help="Enter your OpenAI API key"
-        )
-
-        llama_cloud_key = st.text_input(
-            "LlamaCloud API Key",
-            type="password",
-            placeholder="llx-...",
-            help="Enter your LlamaCloud API key"
-        )
-
-        # Index configuration
-        st.markdown("#### Index Configuration")
-        index_name = st.text_input(
-            "Index Name",
-            value="apple_tesla_demo_2",
-            help="Name of your LlamaCloud index"
-        )
-
-        project_name = st.text_input(
-            "Project Name",
-            value="llamacloud_demo",
-            help="Name of your LlamaCloud project"
-        )
-
-        # Example queries
-        st.markdown("#### 📝 Example Queries")
-        example_queries = [
-            "Compare Tesla and Apple's assets and liabilities for 2021",
-            "Analyze Apple's gross margin trends from 2020-2023",
-            "Provide a summary of Tesla's 2023 performance",
-            "Compare revenue growth between Apple and Tesla",
-            "Analyze the cash flow patterns of both companies"
-        ]
-
-        selected_example = st.selectbox(
-            "Choose an example query:",
-            [""] + example_queries,
-            help="Select a pre-written query to try"
-        )
-
-        if st.button("🔄 Use Example Query", help="Load the selected example"):
-            if selected_example:
-                st.session_state.example_query = selected_example
-
-        return openai_key, llama_cloud_key, index_name, project_name, selected_example
-
-
-def create_status_indicators():
-    """Create status indicators for the application."""
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        if st.session_state.get('initialized', False):
-            st.markdown("""
-            <div class="metric-card">
-                <h4>✅ Connected</h4>
-                <p>Ready to generate</p>
-            </div>
-            """, unsafe_allow_html=True)
+        
+        if has_openai and has_llama:
+            st.success("✅ API keys loaded from environment")
+            st.session_state.env_keys_available = True
         else:
-            st.markdown("""
-            <div class="metric-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);">
-                <h4>❌ Not Connected</h4>
-                <p>Enter API keys</p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info("💡 Enter API keys or add them to .env file")
+            st.session_state.env_keys_available = False
+            
+            openai_key = st.text_input(
+                "OpenAI API Key",
+                type="password",
+                value=st.session_state.get('openai_key', ''),
+                help="Required for AI analysis (starts with sk-)",
+                placeholder="sk-..."
+            )
+            
+            llama_key = st.text_input(
+                "LlamaCloud API Key", 
+                type="password",
+                value=st.session_state.get('llama_key', ''),
+                help="Required for document indexing (starts with llx-)",
+                placeholder="llx-..."
+            )
+            
+            # Validate API key formats
+            if openai_key:
+                if not openai_key.startswith('sk-'):
+                    st.warning("⚠️ OpenAI API key should start with 'sk-'")
+                st.session_state.openai_key = openai_key
+            if llama_key:
+                if not llama_key.startswith('llx-'):
+                    st.warning("⚠️ LlamaCloud API key should start with 'llx-'")
+                st.session_state.llama_key = llama_key
+        
+        st.markdown("---")
+        
+        # Project settings
+        st.markdown("#### Project Settings")
+        
+        project_type = st.radio(
+            "Project Type",
+            ["Existing Project", "New Project"],
+            help="Connect to existing or create new"
+        )
+        
+        if project_type == "Existing Project":
+            project_name = st.text_input(
+                "Project Name",
+                value="Default",
+                help="Your LlamaCloud project name",
+                disabled=True
+            )
+            
+            index_name = st.text_input(
+                "Index Name", 
+                value="apple_tesla_demo_2",
+                help="Index within the project"
+            )
+            
+            # Validate project inputs
+            if project_name and not project_name.strip():
+                st.warning("⚠️ Project name cannot be empty")
+            if index_name and not index_name.strip():
+                st.warning("⚠️ Index name cannot be empty")
+            
+            st.session_state.project_config = {
+                'type': 'existing',
+                'project_name': project_name.strip() if project_name else '',
+                'index_name': index_name.strip() if index_name else ''
+            }
+            
+        else:
+            new_project_name = st.text_input(
+                "New Project Name",
+                value="my_financial_project",
+                help="Name for your new project (no spaces or special characters)"
+            )
+            
+            new_index_name = st.text_input(
+                "New Index Name",
+                value="financial_documents",
+                help="Name for your document index (no spaces or special characters)"
+            )
+            
+            # Validate new project inputs
+            if new_project_name and not new_project_name.strip():
+                st.warning("⚠️ Project name cannot be empty")
+            if new_index_name and not new_index_name.strip():
+                st.warning("⚠️ Index name cannot be empty")
+            
+            upload_method = st.selectbox(
+                "Upload Method",
+                ["Upload Files", "Provide URLs"]
+            )
+            
+            files_data = None
+            if upload_method == "Upload Files":
+                uploaded_files = st.file_uploader(
+                    "Upload Documents",
+                    type=['pdf', 'txt', 'docx'],
+                    accept_multiple_files=True,
+                    help="Upload PDF, TXT, or DOCX files (max 200MB each)"
+                )
+                if uploaded_files:
+                    # Validate file sizes
+                    total_size = sum(file.size for file in uploaded_files)
+                    if total_size > 500 * 1024 * 1024:  # 500MB total limit
+                        st.error("⚠️ Total file size exceeds 500MB limit")
+                    else:
+                        files_data = uploaded_files
+                        st.success(f"✅ {len(uploaded_files)} files selected ({total_size / (1024*1024):.1f}MB)")
+                
+            else:
+                url_text = st.text_area(
+                    "Document URLs",
+                    height=100,
+                    placeholder="https://example.com/doc1.pdf\nhttps://example.com/doc2.pdf",
+                    help="Enter one URL per line (must be publicly accessible)"
+                )
+                if url_text.strip():
+                    urls = [url.strip() for url in url_text.strip().split('\n') if url.strip()]
+                    # Validate URLs
+                    valid_urls = []
+                    for url in urls:
+                        if url.startswith(('http://', 'https://')):
+                            valid_urls.append(url)
+                        else:
+                            st.warning(f"⚠️ Invalid URL: {url}")
+                    
+                    if valid_urls:
+                        files_data = valid_urls
+                        st.success(f"✅ {len(valid_urls)} valid URLs found")
+            
+            st.session_state.project_config = {
+                'type': 'new',
+                'project_name': new_project_name.strip() if new_project_name else '',
+                'index_name': new_index_name.strip() if new_index_name else '',
+                'files_data': files_data
+            }
 
-    with col2:
-        reports_generated = st.session_state.get('reports_generated', 0)
+
+def create_status_dashboard():
+    """Create simple status dashboard."""
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        status = "connected" if st.session_state.get('initialized', False) else "disconnected"
+        icon = "✅" if status == "connected" else "❌"
+        label = "Connected" if status == "connected" else "Disconnected"
+        
         st.markdown(f"""
-        <div class="metric-card">
-            <h4>📊 Reports</h4>
-            <p>{reports_generated} Generated</p>
+        <div class="status-card {status}">
+            <div class="status-number">{icon}</div>
+            <div class="status-label">{label}</div>
         </div>
         """, unsafe_allow_html=True)
-
+    
+    with col2:
+        count = st.session_state.get('reports_generated', 0)
+        st.markdown(f"""
+        <div class="status-card">
+            <div class="status-number">{count}</div>
+            <div class="status-label">Reports Generated</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
         avg_time = st.session_state.get('avg_generation_time', 0)
         st.markdown(f"""
-        <div class="metric-card">
-            <h4>⏱️ Avg Time</h4>
-            <p>{avg_time:.1f}s</p>
+        <div class="status-card">
+            <div class="status-number">{avg_time:.1f}s</div>
+            <div class="status-label">Avg Time</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        project = st.session_state.get('current_project', 'None')
+        st.markdown(f"""
+        <div class="status-card">
+            <div class="status-number">📁</div>
+            <div class="status-label">{project}</div>
         </div>
         """, unsafe_allow_html=True)
 
 
-def create_query_interface():
-    """Create the main query interface."""
+def create_setup_interface():
+    """Create simplified setup interface."""
     st.markdown("""
-    <div class="feature-card">
-        <h3>💭 Ask Your Financial Question</h3>
-        <p>Enter your query about financial data, comparisons, or analysis below.</p>
+    <div class="card">
+        <div class="card-title">🚀 Project Setup</div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Check if we have all required inputs
+    config = st.session_state.get('project_config', {})
+    
+    # Check API keys
+    has_keys = False
+    if st.session_state.get('env_keys_available'):
+        has_keys = True
+        openai_key = None
+        llama_key = None
+    else:
+        openai_key = st.session_state.get('openai_key', '')
+        llama_key = st.session_state.get('llama_key', '')
+        has_keys = bool(openai_key and llama_key)
+    
+    if not has_keys:
+        st.markdown("""
+        <div class="alert alert-info">
+            ℹ️ Please provide API keys in the sidebar to continue
+        </div>
+        """, unsafe_allow_html=True)
+        return None
+    
+    if not config:
+        st.markdown("""
+        <div class="alert alert-info">
+            ℹ️ Please configure your project in the sidebar
+        </div>
+        """, unsafe_allow_html=True)
+        return None
+    
+    # Validate configuration
+    setup_ready = True
+    error_messages = []
+    
+    if config.get('type') == 'existing':
+        if not config.get('project_name', '').strip():
+            error_messages.append("Project name is required")
+            setup_ready = False
+        if not config.get('index_name', '').strip():
+            error_messages.append("Index name is required")
+            setup_ready = False
+    elif config.get('type') == 'new':
+        if not config.get('project_name', '').strip():
+            error_messages.append("Project name is required")
+            setup_ready = False
+        if not config.get('index_name', '').strip():
+            error_messages.append("Index name is required")
+            setup_ready = False
+        if not config.get('files_data'):
+            error_messages.append("Please upload files or provide URLs")
+            setup_ready = False
+    
+    # Display errors
+    if error_messages:
+        for msg in error_messages:
+            st.markdown(f"""
+            <div class="alert alert-error">
+                ❌ {msg}
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Show setup summary
+    if setup_ready:
+        st.markdown("### Setup Summary")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write(f"**Type:** {config.get('type', 'unknown').title()}")
+            st.write(f"**Project:** {config.get('project_name', 'N/A')}")
+        with col2:
+            st.write(f"**Index:** {config.get('index_name', 'N/A')}")
+            if config.get('type') == 'new' and config.get('files_data'):
+                file_count = len(config['files_data'])
+                st.write(f"**Files:** {file_count} items")
+    
+    # Check if setup is in progress
+    setup_in_progress = st.session_state.get('setup_in_progress', False)
+    
+    if st.button("🚀 Setup Project", 
+                disabled=not setup_ready or setup_in_progress, 
+                use_container_width=True):
+        try:
+            # Mark setup as in progress
+            st.session_state.setup_in_progress = True
+            
+            if config['type'] == 'existing':
+                return ('existing', openai_key, llama_key, 
+                       config['project_name'], config['index_name'])
+            else:
+                return ('new', openai_key, llama_key,
+                       config['project_name'], config['index_name'], 
+                       config.get('files_data'))
+        except Exception as e:
+            st.session_state.setup_in_progress = False
+            st.error(f"Setup failed: {str(e)}")
+            return None
+    
+    if setup_in_progress:
+        st.info("⏳ Setup in progress... Please wait.")
+        
+    return None
 
-    # Use example query if available
-    default_query = st.session_state.get('example_query', '')
 
+def create_main_interface():
+    """Create simplified main interface."""
+    st.markdown("""
+    <div class="card">
+        <div class="card-title">💭 Financial Analysis</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Simple query interface
     query = st.text_area(
-        "Enter your financial analysis query:",
-        value=default_query,
+        "What would you like to analyze?",
         height=100,
-        placeholder="e.g., Compare the revenue growth of Apple and Tesla over the last 3 years...",
-        help="Describe what financial analysis or comparison you'd like to see"
+        placeholder="e.g., Compare Apple and Tesla's revenue growth over the past 3 years...",
+        help="Ask any question about your financial documents"
     )
-
-    # Clear the example query after use
-    if 'example_query' in st.session_state:
-        del st.session_state.example_query
-
-    col1, col2, col3 = st.columns([2, 1, 2])
+    
+    col1, col2 = st.columns([1, 4])
     with col2:
         generate_button = st.button(
-            "🚀 Generate Report",
-            disabled=not st.session_state.get('initialized', False),
-            help="Generate a comprehensive financial report based on your query"
+            "Generate Report",
+            disabled=not query.strip(),
+            use_container_width=True
         )
-
+    
     return query, generate_button
 
 
-def display_loading_animation():
-    """Display a loading animation during report generation."""
-    with st.spinner(""):
+def show_loading(message="Processing..."):
+    """Show simple loading indicator."""
+    with st.spinner(message):
         progress_bar = st.progress(0)
-        status_text = st.empty()
-
-        steps = [
-            "🔍 Analyzing your query...",
-            "📚 Searching financial documents...",
-            "🧠 Processing information...",
-            "📊 Generating insights...",
-            "📝 Formatting report..."
-        ]
-
-        for i, step in enumerate(steps):
-            status_text.text(step)
-            progress_bar.progress((i + 1) / len(steps))
-            time.sleep(0.8)
-
-        status_text.empty()
+        for i in range(100):
+            time.sleep(0.02)
+            progress_bar.progress(i + 1)
         progress_bar.empty()
 
 
-def display_report(report_output):
-    """Display the generated report with beautiful formatting."""
-    st.markdown("""
-    <div class="feature-card">
-        <h3>📋 Generated Financial Report</h3>
+def display_success_message(message):
+    """Display success message."""
+    st.markdown(f"""
+    <div class="alert alert-success">
+        ✅ {message}
     </div>
     """, unsafe_allow_html=True)
 
-    for i, block in enumerate(report_output.blocks):
+
+def display_error_message(message):
+    """Display error message."""
+    st.markdown(f"""
+    <div class="alert alert-error">
+        ❌ {message}
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def display_info_message(message):
+    """Display info message."""
+    st.markdown(f"""
+    <div class="alert alert-info">
+        ℹ️ {message}
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def display_report(report_output):
+    """Display generated report with simple formatting."""
+    st.markdown("""
+    <div class="card">
+        <div class="card-title">📊 Financial Report</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    for block in report_output.blocks:
         if hasattr(block, 'text'):  # TextBlock
             st.markdown(f"""
             <div class="report-section">
                 <div class="report-text">{block.text}</div>
             </div>
             """, unsafe_allow_html=True)
-
+            
         elif hasattr(block, 'caption'):  # TableBlock
             st.markdown(f"""
-            <div class="table-container">
+            <div class="report-section">
                 <h4>{block.caption}</h4>
             </div>
             """, unsafe_allow_html=True)
-
-            # Create DataFrame and display
+            
+            # Display table
             df = block.to_df()
-
-            # Style the dataframe
-            styled_df = df.style.set_properties(**{
-                'background-color': 'white',
-                'color': 'black',
-                'border-color': '#e0e0e0'
-            }).set_table_styles([
-                {'selector': 'th',
-                 'props': [('background-color', '#667eea'), ('color', 'white'), ('font-weight', 'bold')]},
-                {'selector': 'td', 'props': [('border', '1px solid #e0e0e0')]}
-            ])
-
-            st.dataframe(styled_df, use_container_width=True)
-
-            # Create a visualization if the data is numeric
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            
+            # Simple visualization
             try:
-                numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-                if len(numeric_cols) > 0 and len(df) > 1:
-                    create_chart_from_table(df, block.caption)
+                create_simple_chart(df, block.caption)
             except:
-                pass  # Skip visualization if data isn't suitable
+                pass
 
 
-def create_chart_from_table(df, title):
-    """Create a chart from table data if possible."""
+def create_simple_chart(df, title):
+    """Create simple chart from dataframe."""
     try:
         numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-
+        
         if len(numeric_cols) >= 1 and len(df) > 1:
-            # Create a bar chart
-            if len(df.columns) >= 2:
-                fig = px.bar(
-                    df,
-                    x=df.columns[0],
-                    y=numeric_cols[0],
-                    title=f"Visualization: {title}",
-                    color_discrete_sequence=['#667eea']
-                )
-
-                fig.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='#2c3e50'),
-                    title_font_size=16
-                )
-
-                st.plotly_chart(fig, use_container_width=True)
-
-    except Exception as e:
-        pass  # Silently skip if visualization fails
-
-
-def display_success_message():
-    """Display success message after report generation."""
-    st.markdown("""
-    <div class="success-banner">
-        <h4>✅ Report Generated Successfully!</h4>
-        <p>Your financial analysis is ready. You can scroll down to view the complete report.</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def display_error_message(error_msg):
-    """Display error message."""
-    st.markdown(f"""
-    <div class="error-banner">
-        <h4>❌ Error Occurred</h4>
-        <p>{error_msg}</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def create_footer():
-    """Create application footer."""
-    st.markdown("---")
-    st.markdown("""
-    <div style="text-align: center; color: white; padding: 2rem;">
-        <p>🤖 Powered by LlamaIndex, OpenAI, and Streamlit</p>
-        <p style="font-size: 0.9rem;">Built for intelligent financial analysis and reporting</p>
-    </div>
-    """, unsafe_allow_html=True)
+            if len(df) <= 10:
+                fig = px.bar(df, x=df.columns[0], y=numeric_cols[0], 
+                           title=title, color_discrete_sequence=['#2563eb'])
+            else:
+                fig = px.line(df, x=df.columns[0], y=numeric_cols[0], 
+                            title=title, color_discrete_sequence=['#2563eb'])
+            
+            fig.update_layout(
+                plot_bgcolor='white',
+                paper_bgcolor='white',
+                font_color='#374151'
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+    except Exception:
+        pass
 
 
 def initialize_session_state():
     """Initialize session state variables."""
-    if 'initialized' not in st.session_state:
-        st.session_state.initialized = False
-    if 'generator' not in st.session_state:
-        st.session_state.generator = None
-    if 'reports_generated' not in st.session_state:
-        st.session_state.reports_generated = 0
-    if 'avg_generation_time' not in st.session_state:
-        st.session_state.avg_generation_time = 0.0
-    if 'generation_times' not in st.session_state:
-        st.session_state.generation_times = []
+    defaults = {
+        'initialized': False,
+        'generator': None,
+        'reports_generated': 0,
+        'avg_generation_time': 0.0,
+        'generation_times': [],
+        'current_project': 'None',
+        'setup_complete': False,
+        'env_keys_available': False,
+        'setup_in_progress': False
+    }
+    
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
